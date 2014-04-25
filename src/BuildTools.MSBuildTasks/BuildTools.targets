@@ -102,7 +102,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEAL
     </PropertyGroup>
 
     <GenerateAssemblyInfo Language="$(AssemblyInfoFileLanguage)" 
-                          FileName="AssemblyInfo$(AssemblyInfoFileExtension)" 
+                          FileName="AssemblyInfo.Generated$(AssemblyInfoFileExtension)" 
                           CLSCompliant="true" 
                           AssemblyVersion="$(AssemblyVersionMajor).$(AssemblyVersionMinor).0.0" 
                           AssemblyFileVersion="$(AssemblyFileVersion)" 
@@ -110,7 +110,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEAL
 
     <!-- Make sure the generated AssemblyInfo file will compile with the other sources. -->
     <ItemGroup>
-      <Compile Include="AssemblyInfo$(AssemblyInfoFileExtension)" />
+      <Compile Include="AssemblyInfo.Generated$(AssemblyInfoFileExtension)" />
     </ItemGroup>
   </Target>
 

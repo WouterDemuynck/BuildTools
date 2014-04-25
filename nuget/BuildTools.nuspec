@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+	<metadata>
+		<id>BuildTools</id>
+		<version>2.5.0-prealpha</version>
+		<title>BuildTools</title>
+		<authors>Wouter Demuynck</authors>
+		<description>BuildTools is a collection of (MSBuild-) extensions for automating common tasks you encounter when building your software solution.</description>
+		<language>en-US</language>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+	</metadata>
+	<files>
+		<file src="..\bin\Release\BuildTools.dll" target="tools\BuildTools.dll" />
+		<file src="..\bin\Release\BuildTools.MSBuildTasks.dll" target="tools\BuildTools.MSBuildTasks.dll" />
+		<file src="..\bin\Release\BuildTools.targets" target="tools\BuildTools.targets" />
+		<file src="..\bin\Release\Init.ps1" target="tools\Init.ps1" />
+		<file src="..\bin\Release\Install.ps1" target="tools\Install.ps1" />
+		<file src="..\bin\Release\Uninstall.ps1" target="tools\Uninstall.ps1" />
+		<file src="..\bin\Release\README-BuildTools.txt" target="content\README-BuildTools.txt" />
+	</files>
+</package>
