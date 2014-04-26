@@ -50,7 +50,7 @@ namespace BuildTools.MSBuildTasks
 			}
 			else
 			{
-				version = VersionNumberGenerator.GenerateVersion(VersionFile, buildType, revisionType, startingDate);
+				version = VersionNumberGenerator.GenerateVersion(VersionFile, Major, Minor, buildType, revisionType, startingDate);
 			}
 
 			Version = version.ToString();

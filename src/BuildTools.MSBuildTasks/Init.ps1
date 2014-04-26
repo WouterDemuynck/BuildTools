@@ -15,25 +15,18 @@ Copy-Item (Join-Path $toolsPath 'BuildTools.dll') $buildtoolsFolder -Force
 Copy-Item (Join-Path $toolsPath 'BuildTools.MSBuildTasks.dll') $buildtoolsFolder -Force
 Copy-Item (Join-Path $toolsPath 'BuildTools.targets') $buildtoolsFolder -Force
 
-# The Express Edition of Visual Studio does not support solution folders...
-$isExpress = $dte.Edition.ToLower().Contains('express')
-
-if (!$isExpress) {
-	Write-Host "Creating solution items..."
-	$solution = Get-Interface $dte.Solution([EnvDTE80.Solution2])
+Write-Host "Creating solution items..."
+$solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
  
-	# Create the solution folder.
-	$buildtoolsSolutionFolder = $solution.Projects | where-object { $_.ProjectName -eq ".buildtools" } | select -first 1
-	if(!$buildtoolsSolutionFolder) {
-		$buildtoolsSolutionFolder = $solution.AddSolutionFolder(".buildtools")
-	}
-
-	# Add the solution folder items.
-	$buildtoolsSolutionFolderItems = Get-Interface $buildtoolsFolder.Object ([EnvDTE80.SolutionFolder])
- 
-	$buildtoolsSolutionFolderItems.AddFromFile((Join-Path $buildtoolsFolder 'BuildTools.dll'))
-	$buildtoolsSolutionFolderItems.AddFromFile((Join-Path $buildtoolsFolder 'BuildTools.MSBuildTasks.dll'))
-	$buildtoolsSolutionFolderItems.AddFromFile((Join-Path $buildtoolsFolder 'BuildTools.targets'))
-} else {
-	Write-Host "Not creating the solution folder because this is an Express Edition of Visual Studio."
+# Create the solution folder.
+$buildtoolsSolutionFolder = $solution.Projects | where-object { $_.ProjectName -eq ".buildtools" } | select -first 1
+if(!$buildtoolsSolutionFolder) {
+	$buildtoolsSolutionFolder = $solution.AddSolutionFolder(".buildtools")
 }
+
+# Add the solution folder items.
+$buildtoolsSolutionFolderItems = Get-Interface $buildtoolsSolutionFolder.ProjectItems ([EnvDTE.ProjectItems])
+ 
+$buildtoolsSolutionFolderItems.AddFromFile((Join-Path $buildtoolsFolder 'BuildTools.dll'))
+$buildtoolsSolutionFolderItems.AddFromFile((Join-Path $buildtoolsFolder 'BuildTools.MSBuildTasks.dll'))
+$buildtoolsSolutionFolderItems.AddFromFile((Join-Path $buildtoolsFolder 'BuildTools.targets'))

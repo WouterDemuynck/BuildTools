@@ -18,6 +18,7 @@
 //
 
 using System;
+using System.Linq;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
@@ -30,6 +31,9 @@ namespace BuildTools
 	/// </summary>
 	public static class VersionNumberGenerator
 	{
+        private static readonly BuildNumberType[] BuildNumberTypesRequiringVersionFile = new[] { BuildNumberType.Fixed, BuildNumberType.Increment };
+        private static readonly RevisionNumberType[] RevisionNumberTypesRequiringVersionFile = new[] { RevisionNumberType.Fixed, RevisionNumberType.Increment, RevisionNumberType.BuildIncrement };
+
 		/// <summary>
 		/// Generates a new version number using the specified major and minor version numbers
 		/// and calculating the build number and revision number using the specified algorithms.
@@ -57,14 +61,48 @@ namespace BuildTools
 		/// <param name="revisionType">The <see cref="RevisionNumberType"/> specifying the algorithm used to calculate the revision number.</param>
 		/// <param name="startingDate">The starting date from which to derive the new version number. This parameter is ignored by some algorithms.</param>
 		public static Version GenerateVersion(string versionFile, BuildNumberType buildType, RevisionNumberType revisionType, DateTime startingDate)
-		{
-			if (string.IsNullOrWhiteSpace(versionFile)) throw new ArgumentNullException("versionFile");
-
-			Version currentVersion = LoadVersionFromFile(versionFile);
-			Version newVersion = GenerateVersion(currentVersion, buildType, revisionType, startingDate);
-			SaveVersionToFile(versionFile, newVersion);
-			return newVersion;
+        {
+            return GenerateVersion(versionFile, 1, 0, buildType, revisionType, startingDate);
 		}
+
+        /// <summary>
+        /// Generates a new version number using the specified major and minor version numbers
+        /// and calculating the build number and revision number using the specified algorithms.
+        /// The current version number loaded from the specified file name is used by some algorithms
+        /// to increment the build and revision numbers, and the new version is saved in this file after
+        /// generating the new values.
+        /// </summary>
+        /// <param name="versionFile">The location of the file in which the current version number is stored. This file will be overwritten with the newly generated version number.</param>
+        /// <param name="majorVersion">The major version for the newly generated version number.</param>
+        /// <param name="minorVersion">The minor version for the newly generated version number.</param>
+        /// <param name="buildType">The <see cref="BuildNumberType"/> specifying the algorithm used to calculate the build number.</param>
+        /// <param name="revisionType">The <see cref="RevisionNumberType"/> specifying the algorithm used to calculate the revision number.</param>
+        /// <param name="startingDate">The starting date from which to derive the new version number. This parameter is ignored by some algorithms.</param>
+        public static Version GenerateVersion(string versionFile, int majorVersion, int minorVersion, BuildNumberType buildType, RevisionNumberType revisionType, DateTime startingDate)
+        {
+            Version currentVersion = LoadVersionFromFile(versionFile, majorVersion, minorVersion, buildType, revisionType);
+            Version newVersion = GenerateVersion(currentVersion, buildType, revisionType, startingDate);
+           
+            if (RequiresVersionFile(buildType, revisionType))
+            {
+                SaveVersionToFile(versionFile, newVersion);
+            }
+            return newVersion;
+        }
+
+        /// <summary>
+        /// Generates a new version number using the specified major and minor version numbers
+        /// and calculating the build number and revision number using the specified algorithms.
+        /// </summary>
+        /// <param name="majorVersion">The major version for the newly generated version number.</param>
+        /// <param name="minorVersion">The minor version for the newly generated version number.</param>
+        /// <param name="buildType">The <see cref="BuildNumberType"/> specifying the algorithm used to calculate the build number.</param>
+        /// <param name="revisionType">The <see cref="RevisionNumberType"/> specifying the algorithm used to calculate the revision number.</param>
+        /// <param name="startingDate">The starting date from which to derive the new version number. This parameter may be ignored by some algorithms.</param>
+        public static Version GenerateVersion(int majorVersion, int minorVersion, BuildNumberType buildType, RevisionNumberType revisionType, DateTime startingDate)
+        {
+            return GenerateVersion(new Version(majorVersion, minorVersion), buildType, revisionType, startingDate);
+        }
 
 		/// <summary>
 		/// Generates a new version number using the specified major and minor version numbers
@@ -80,8 +118,8 @@ namespace BuildTools
 			int revision = CalculateRevisionNumber(startingDate, currentVersion.Revision, revisionType, build != currentVersion.Build);
 
 			// Correct any overflows that might occur with some algorithms.
-			while (build > short.MaxValue) build -= short.MaxValue;
-			while (revision > short.MaxValue) revision -= short.MaxValue;
+			while (build > ushort.MaxValue) build -= ushort.MaxValue;
+			while (revision > ushort.MaxValue) revision -= ushort.MaxValue;
 
 			// Generate the return value.
 			return new Version(currentVersion.Major, currentVersion.Minor, build, revision);
@@ -142,18 +180,31 @@ namespace BuildTools
 			throw new InvalidEnumArgumentException("revisionType", (int)revisionType, typeof(RevisionNumberType));
 		}
 
+        private static Version LoadVersionFromFile(string versionFile, int majorVersion, int minorVersion, BuildNumberType buildType, RevisionNumberType revisionType)
+        {
+            if (RequiresVersionFile(buildType, revisionType))
+            {
+                if (string.IsNullOrWhiteSpace(versionFile)) throw new ArgumentNullException("versionFile");
 
-		private static Version LoadVersionFromFile(string path)
-		{
-			if (File.Exists(path))
-				return new Version(File.ReadAllText(path));
+                if (File.Exists(versionFile))
+                {
+                    Version version = new Version(File.ReadAllText(versionFile));
+                    return new Version(majorVersion, minorVersion, version.Build, version.Revision);
+                }
+            }
 
-			return new Version(1, 0);
-		}
+            return new Version(majorVersion, minorVersion);
+        }
+
+        private static bool RequiresVersionFile(BuildNumberType buildType, RevisionNumberType revisionType)
+        {
+            return BuildNumberTypesRequiringVersionFile.Contains(buildType) ||
+                RevisionNumberTypesRequiringVersionFile.Contains(revisionType);
+        }
 
 		private static void SaveVersionToFile(string path, Version version)
 		{
 			File.WriteAllText(path, version.ToString());
 		}
-	}
+    }
 }

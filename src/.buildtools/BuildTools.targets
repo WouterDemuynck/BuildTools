@@ -58,13 +58,15 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEAL
       <BuildType Condition=" $(BuildType) == '' ">YearMonthDay</BuildType>
       <RevisionType Condition=" $(RevisionType) == '' ">HourMinute</RevisionType>
       <StartingDate Condition=" $(StartingDate) == '' ">%(ProjectFile.CreatedTime)</StartingDate>
+      <VersionFile Condition=" $(VersionFile) == '' ">Generated.version</VersionFile>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectFile Remove="$(MSBuildProjectFullPath)" />
     </ItemGroup>
 
-    <GenerateVersion Major="$(MajorVersion)" 
+    <GenerateVersion VersionFile="$(VersionFile)"
+                     Major="$(MajorVersion)" 
                      Minor="$(MinorVersion)" 
                      BuildType="$(BuildType)" 
                      RevisionType="$(RevisionType)" 

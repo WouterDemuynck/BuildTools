@@ -2,7 +2,7 @@
 <package>
 	<metadata>
 		<id>BuildTools</id>
-		<version>2.5.0-prealpha</version>
+		<version>2.5.0</version>
 		<title>BuildTools</title>
 		<authors>Wouter Demuynck</authors>
 		<description>BuildTools is a collection of (MSBuild-) extensions for automating common tasks you encounter when building your software solution.</description>
