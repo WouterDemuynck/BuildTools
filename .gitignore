@@ -166,6 +166,7 @@ pip-log.txt
 
 # NuGet
 *.nupkg
+packages/
 
 # BuildTools
 AssemblyInfo.Generated.cs
