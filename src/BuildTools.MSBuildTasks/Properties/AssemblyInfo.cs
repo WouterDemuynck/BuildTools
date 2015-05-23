@@ -20,5 +20,5 @@
 using System.Reflection;
 
 [assembly: AssemblyTitle("BuildTools.MSBuildTasks")]
-[assembly: AssemblyProduct("BuildTools.MSBuildTasks")]
-[assembly: AssemblyCopyright("Copyright © 2010 Wouter Demuynck")]
+[assembly: AssemblyProduct("BuildTools")]
+[assembly: AssemblyCopyright("Copyright © 2008-2015 Wouter Demuynck")]

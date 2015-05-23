@@ -77,9 +77,9 @@
     </Content>
   </ItemGroup>
   <PropertyGroup>
-    <MajorVersion>2</MajorVersion>
-    <MinorVersion>5</MinorVersion>
-    <StartingDate>2008-11-26</StartingDate>
+    <MajorVersion>3</MajorVersion>
+    <MinorVersion>0</MinorVersion>
+    <StartingDate>2014-04-26</StartingDate>
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\.buildtools\BuildTools.targets" />

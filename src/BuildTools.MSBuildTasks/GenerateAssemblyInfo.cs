@@ -39,30 +39,30 @@ namespace BuildTools.MSBuildTasks
 		public override bool Execute()
 		{
 			CodeDomProvider provider = CodeDomProvider.CreateProvider(Language);
-			AssemblyInfoGenerator generator = new AssemblyInfoGenerator(CodeDomProvider.CreateProvider(Language));
+			AssemblyInfoBuilder generator = new AssemblyInfoBuilder(CodeDomProvider.CreateProvider(Language));
 
 			if (CLSCompliant)
 			{
 				Log.LogMessage("Adding CLSCompliantAttribute.");
-				generator.AddCLSCompliant(true);
+				generator.WithCLSCompliant(true);
 			}
 
 			if (!string.IsNullOrWhiteSpace(AssemblyVersion))
 			{
 				Log.LogMessage("Adding AssemblyVersionAttribute ({0}).", AssemblyVersion);
-				generator.AddAssemblyVersion(new Version(AssemblyVersion));
+				generator.WithAssemblyVersion(new Version(AssemblyVersion));
 			}
 
 			if (!string.IsNullOrWhiteSpace(AssemblyFileVersion))
 			{
 				Log.LogMessage("Adding AssemblyFileVersionAttribute ({0}).", AssemblyFileVersion);
-				generator.AddAssemblyFileVersion(new Version(AssemblyFileVersion));
+				generator.WithAssemblyFileVersion(new Version(AssemblyFileVersion));
 			}
 
 			if (!string.IsNullOrWhiteSpace(AssemblyInformationalVersion))
 			{
 				Log.LogMessage("Adding AssemblyInformationalVersionAttribute ({0}).", AssemblyInformationalVersion);
-				generator.AddAssemblyInformationalVersion(AssemblyInformationalVersion);
+				generator.WithAssemblyInformationalVersion(AssemblyInformationalVersion);
 			}
 
 			generator.Save(FileName);

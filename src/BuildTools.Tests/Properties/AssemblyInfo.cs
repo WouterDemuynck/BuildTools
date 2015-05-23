@@ -19,6 +19,6 @@
 
 using System.Reflection;
 
-[assembly: AssemblyTitle("BuildTools")]
+[assembly: AssemblyTitle("BuildTools.Tests")]
 [assembly: AssemblyProduct("BuildTools")]
 [assembly: AssemblyCopyright("Copyright © 2008-2015 Wouter Demuynck")]

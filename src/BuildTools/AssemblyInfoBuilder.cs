@@ -22,13 +22,14 @@ using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.IO;
 using System.Reflection;
+using System.Text;
 
 namespace BuildTools
 {
 	/// <summary>
 	/// Provides methods for generating assembly information source files.
 	/// </summary>
-	public sealed class AssemblyInfoGenerator
+	public sealed class AssemblyInfoBuilder
 	{
 		private CodeDomProvider provider;
 		private CodeCompileUnit unit;
@@ -41,7 +42,7 @@ namespace BuildTools
 		private bool isInitialized;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="AssemblyInfoGenerator"/> class.
+		/// Initializes a new instance of the <see cref="AssemblyInfoBuilder"/> class.
 		/// </summary>
 		/// <param name="provider">
 		/// The <see cref="CodeDomProvider"/> used to generate the source code.
@@ -49,7 +50,7 @@ namespace BuildTools
 		/// <exception cref="ArgumentNullException">
 		/// Thrown when the <paramref name="provider"/> argument is <see langword="null"/>.
 		/// </exception>
-		public AssemblyInfoGenerator(CodeDomProvider provider)
+		public AssemblyInfoBuilder(CodeDomProvider provider)
 		{
 			if (provider == null) throw new ArgumentNullException("provider");
 
@@ -65,18 +66,16 @@ namespace BuildTools
 		/// <exception cref="InvalidOperationException">
 		/// Thrown when the <see cref="CLSCompliantAttribute"/> has already been added by calling this method.
 		/// </exception>
-		public void AddCLSCompliant(bool isCompliant)
+		public AssemblyInfoBuilder WithCLSCompliant(bool isCompliant)
 		{
 			EnsureInitialized();
-
-			if (clsCompliantAttribute != null)
-				throw new InvalidOperationException("The CLSCompliantAttribute declaration has already been added.");
-
+            
 			clsCompliantAttribute = new CodeAttributeDeclaration(
 				new CodeTypeReference(typeof(CLSCompliantAttribute)),
 				new CodeAttributeArgument(new CodePrimitiveExpression(isCompliant)));
 
 			unit.AssemblyCustomAttributes.Add(clsCompliantAttribute);
+            return this;
 		}
 
 		/// <summary>
@@ -88,18 +87,16 @@ namespace BuildTools
 		/// <exception cref="InvalidOperationException">
 		/// Thrown when the <see cref="AssemblyVersionAttribute"/> has already been added by calling this method.
 		/// </exception>
-		public void AddAssemblyVersion(Version version)
+		public AssemblyInfoBuilder WithAssemblyVersion(Version version)
 		{
 			EnsureInitialized();
-
-			if (assemblyVersionAttribute != null)
-				throw new InvalidOperationException("The AssemblyVersionAttribute declaration has already been added.");
-
+            
 			assemblyVersionAttribute = new CodeAttributeDeclaration(
 					new CodeTypeReference(typeof(AssemblyVersionAttribute)),
 					new CodeAttributeArgument(new CodePrimitiveExpression(version.ToString())));
 
 			unit.AssemblyCustomAttributes.Add(assemblyVersionAttribute);
+            return this;
 		}
 
 		/// <summary>
@@ -111,18 +108,16 @@ namespace BuildTools
 		/// <exception cref="InvalidOperationException">
 		/// Thrown when the <see cref="AssemblyFileVersionAttribute"/> has already been added by calling this method.
 		/// </exception>
-		public void AddAssemblyFileVersion(Version version)
+		public AssemblyInfoBuilder WithAssemblyFileVersion(Version version)
 		{
 			EnsureInitialized();
-
-			if (assemblyFileVersionAttribute != null)
-				throw new InvalidOperationException("The AssemblyFileVersionAttribute declaration has already been added.");
-
+            
 			assemblyFileVersionAttribute = new CodeAttributeDeclaration(
 					new CodeTypeReference(typeof(AssemblyFileVersionAttribute)),
 					new CodeAttributeArgument(new CodePrimitiveExpression(version.ToString())));
 
 			unit.AssemblyCustomAttributes.Add(assemblyFileVersionAttribute);
+            return this;
 		}
 
 		/// <summary>
@@ -134,19 +129,38 @@ namespace BuildTools
 		/// <exception cref="InvalidOperationException">
 		/// Thrown when the <see cref="AssemblyInformationalVersionAttribute"/> has already been added by calling this method.
 		/// </exception>
-		public void AddAssemblyInformationalVersion(string version)
+		public AssemblyInfoBuilder WithAssemblyInformationalVersion(string version)
 		{
 			EnsureInitialized();
-
-			if (assemblyInformationalVersionAttribute != null)
-				throw new InvalidOperationException("The AssemblyInformationalVersionAttribute declaration has already been added.");
-
+            
 			assemblyInformationalVersionAttribute = new CodeAttributeDeclaration(
 				new CodeTypeReference(typeof (AssemblyInformationalVersionAttribute)),
 				new CodeAttributeArgument(new CodePrimitiveExpression(version)));
 
 			unit.AssemblyCustomAttributes.Add(assemblyInformationalVersionAttribute);
+            return this;
 		}
+
+        /// <summary>
+        /// Returns the generated assembly inforamtion source code.
+        /// </summary>
+        /// <returns>
+        /// The generated assembly information source code.
+        /// </returns>
+        public string Build()
+        {
+            EnsureInitialized();
+
+            CodeGeneratorOptions options = new CodeGeneratorOptions();
+            options.IndentString = "\t";
+            options.BlankLinesBetweenMembers = true;
+
+            StringBuilder builder = new StringBuilder();
+            using (StringWriter writer = new StringWriter(builder))
+                provider.GenerateCodeFromCompileUnit(unit, writer, options);
+
+            return builder.ToString();
+        }
 
 		/// <summary>
 		/// Saves the generated assembly information source code to the specified location.
@@ -156,14 +170,7 @@ namespace BuildTools
 		/// </param>
 		public void Save(string path)
 		{
-			EnsureInitialized();
-
-			CodeGeneratorOptions options = new CodeGeneratorOptions();
-			options.IndentString = "    ";
-			options.BlankLinesBetweenMembers = true;
-
-			using (StreamWriter writer = File.CreateText(path))
-				provider.GenerateCodeFromCompileUnit(unit, writer, options);
+            File.WriteAllText(path, Build());
 		}
 
 		private void EnsureInitialized()
